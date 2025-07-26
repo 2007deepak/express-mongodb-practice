@@ -1,6 +1,10 @@
 import User from "../models/User.models.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken";
+import { log } from "console";
+
 
 const registerUser = async (req, res) => {
 
@@ -85,6 +89,7 @@ console.log(req.body);
          });
 
     }catch(error){
+       console.error("Error in registerUser:", error);
         return res.status(400).json({
             sucsses: false,
             error,
@@ -95,7 +100,49 @@ console.log(req.body);
     
 
    // res.send("registered");
-}
+};
+
+const verifyUser = async (req, res) => {
+ 
+  //get token data from url
+  const { token } = req.params;
+ console.log(token);
+  //validate
+  if (!token) {
+    return res.status(400).json({
+      success: false,
+      message: "Token is Invalid",
+    });
+  }
+  // find the user with the token
+
+  const user = await User.findOne({
+    verificationToken: token,
+  });
+  // if not found return error
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid token",
+    });
+  }
+  // set isVerified to true
+  user.isVerified = true;
+
+  // remove verification token
+  //Jab user.verificationToken = null karte ho, field database me rahega but value null hogi.
+  //Jab user.verificationToken = undefined karte ho, field hi database se remove ho jata hai.
+  //jab hum user.verificationToken = null karte hai to field database me rahega but value null hogi.
+  user.verificationToken = undefined;
+
+  // save the usewr in database
+  //chuki user database hai onther continent me isiliye await lagana jaruri hai
+   await user.save()
+
+   //return response
 
 
-export {registerUser};
+};
+
+
+export { registerUser, verifyUser };
