@@ -3,6 +3,8 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
+
 import { log } from "console";
 
 
@@ -144,5 +146,67 @@ const verifyUser = async (req, res) => {
 
 };
 
+const login = async (req, res) => {
+  //fetch data
+  const { email, password } = req.body;
+  //validation
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "All fields are required",
+    });
+  }
+  // check if user exits
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
+    }
 
-export { registerUser, verifyUser };
+    //check password or match password
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Password is not match",
+      });
+    }
+    const token = jwt.sign({
+      id: user._id, role: user.role },
+      "shhhhh", {
+        expiresIn : "24h"
+      }
+    );
+    const cookieOption = {
+      //ye karne se cokies backend ke haath me chala jataa hai user ke conroll me 9nhi 
+      //rahta hai 
+      httpOnly : true,
+      secure: true,
+      maxAge: 24*60*60*1000
+    }
+    res.cookie("token",token, cookieOption)
+    
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        token,
+        user: {
+          id: user._id,
+          name: user.firstName,
+          role: user.role,
+        },
+      });
+
+  } catch (error) {
+    console.log("Error is :", error);
+    return res.status(400).json({
+      success: false,
+      message:"User cannot login please register "
+    })
+  }
+};
+
+
+export { registerUser, verifyUser, login };
