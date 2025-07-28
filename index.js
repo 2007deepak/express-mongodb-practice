@@ -30,7 +30,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 7000;
 
 app.get("/", (req, res) => {
   res.send("Cohort!");
