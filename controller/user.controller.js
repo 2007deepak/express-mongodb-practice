@@ -175,7 +175,9 @@ const login = async (req, res) => {
     }
     const token = jwt.sign({
       id: user._id, role: user.role },
-      "shhhhh", {
+      
+     process.env.JWT_SECRET,
+       {
         expiresIn : "24h"
       }
     );
@@ -209,4 +211,93 @@ const login = async (req, res) => {
 };
 
 
-export { registerUser, verifyUser, login };
+const Profile = async (req, res) => {
+
+  console.log("Profile me hai ji ham");
+
+  try{
+
+     const user = await User. findById(req.user.id).select("-password")
+    if(!user){
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  }catch(error){
+    console.log("error is: ", error);
+    return res.status(400).json({
+      success : false,
+      message : "Profile not fonund"
+    })
+    
+
+  }
+
+}
+
+const logoutUser = async (req, res) => {
+  console.log("Logout user : ");
+  
+  try{
+    res.cookie("token","", {});
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  }catch(error)
+  {
+    return res.status(500).json({
+      success: false,
+      message: "Cannot logedin please try again"
+
+    });
+  }
+
+}
+
+  const forgotPassword = async (req, res) => {
+    try {
+      //get email
+      //find user based on email
+      //password reset token + reset expiry => Date.now() + 10*60*1000
+      //user save
+      //send email
+    } catch (error) {}
+  };
+
+  const resetPassword = async (req, res) => {
+    try {
+      //collect token from params
+      //password from req.body
+
+      const { token } = req.params;
+      const { password } = req.body;
+      try {
+      } catch (error) {
+        //find user
+        const user = await findOne({
+          resetPasswordToken: token,
+          resetPasswordExpires: { $gt: Date.now() },
+        });
+        //set password in user
+        //resetToken, resetExpiry => reset
+        //save
+      }
+    } catch (error) {}
+  };
+
+export {
+  registerUser,
+  verifyUser,
+  login,
+  Profile,
+  logoutUser,
+  forgotPassword,
+  resetPassword,
+};
