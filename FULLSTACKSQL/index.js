@@ -3,6 +3,11 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser";
 import cors from "cors"
 
+
+//costum router
+import userRouter from "./routes/auth.route.js";
+
+
 dotenv.config()
 
 const port = process.env.PORT || 4000
@@ -27,6 +32,7 @@ app.get("/", (req,res) => {
     })
 })
 
+app.use("/api/v1/user",userRouter);
 
 app.listen(process.env.PORT, () => {
     console.log(`Backend is runing at Port:${port}`);
