@@ -29,3 +29,12 @@ coverage/
 # IDE files (VS Code, JetBrains, etc.)
 .vscode/
 .idea/
+# Prisma specific
+/prisma/generated
+/generated/prisma
+
+node_modules/
+.env
+npm-debug.log
+yarn-error.log
+prisma/generated/
