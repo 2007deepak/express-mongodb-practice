@@ -78,7 +78,26 @@ userSchema.methods.generateAccessToken = function (){
         {expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
     );
 }
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
+  );
+};
+
+userSchema.methods.generateTemporaryToken = function(){
+    const unHashedToken = crypto.randomBytes(20).toString("hex");
 
 
+    const hashedTken = crypto.createHAsh("sha256").update
+    (unHashedToken).digest("hex")
 
+    const tokenExpiry = Date.now() + (20*60*1000) //20min
+    return {hashedTken,unHashedToken , tokenExpiry}
+
+}
 export const User = mongoose.model("User", userSchema);
